@@ -31,7 +31,7 @@ def execute_external_command(command_parts):
 
     if full_path is None:
         print(f"{program}: command not found")
-        break
+        return
 
     try:
         result = subprocess.run([full_path] + args, capture_output=False)
