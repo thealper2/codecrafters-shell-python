@@ -2,7 +2,7 @@ import sys
 import os
 import subprocess
 
-COMMANDS = ["type", "exit", "echo"]
+COMMANDS = ["type", "exit", "echo", "pwd"]
 
 def find_in_path(command):
     """Search for an executable command in PATH directories."""
@@ -36,11 +36,16 @@ def main():
         cmd = command_parts[0]
         args = command_parts[1:] if len(command_parts) > 1 else []
 
-        if command == "exit":
+        if cmd == "exit":
             break
-        elif command.startswith("echo "):
+        elif cmd == "echo":
             print(" ".join(args))
-        elif command.startswith("type "):
+        elif cmd == "pwd":
+            try:
+                print(os.getcwd())
+            except Exception as e:
+                print(f"Error getting current directory: {e}")
+        elif cmd == "type":
             if not args:
                 continue
 
