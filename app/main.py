@@ -60,7 +60,7 @@ def main():
                 print(f"{cmd}: command not found")
             else:
                 try:
-                    subprocess.run([full_path, cmd] + args)
+                    subprocess.run([cmd] + args, executable=full_path)
                 except Exception as e:
                     print(f"Error executing {cmd}: {e}")
 
