@@ -19,25 +19,6 @@ def find_in_path(command):
 
     return None
 
-def execute_external_command(command_parts):
-    """Execute an external command with its arguments."""
-    if not command_parts:
-        return
-
-    program = command_parts[0]
-    args = commands_parts[1:]
-
-    full_path = find_in_path(program)
-
-    if full_path is None:
-        print(f"{program}: command not found")
-        return
-
-    try:
-        result = subprocess.run([full_path] + args, capture_output=False)
-    except Exception as e:
-        print(f"Error executing {program}: {e}")
-
 def main():
     while True:
         sys.stdout.write("$ ")
@@ -79,7 +60,7 @@ def main():
                 print(f"{cmd}: command not found")
             else:
                 try:
-                    subprocess.run([full_path] + args)
+                    subprocess.run([full_path, cmd] + args)
                 except Exception as e:
                     print(f"Error executing {cmd}: {e}")
 
