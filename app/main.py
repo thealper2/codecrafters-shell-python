@@ -47,9 +47,26 @@ def main():
                 print(f"Error getting current directory: {e}")
         elif cmd == "cd":
             if not args:
+                home_dir = os.environ.get("HOME")
+                if home_dir:
+                    try:
+                        os.chdir(home_dir)
+                    except Exception as e:
+                        print(f"cd: {home_dir}: {e}")
+                else:
+                    print("cd: HOME not set")
+
                 continue
 
             target_dir = args[0]
+
+            if target_dir == "~":
+                home_dir = os.environ.get("HOME")
+                if home_dir:
+                    target_dir = home_dir
+                else:
+                    print("cd: HOME not set")
+                    continue
 
             if os.path.isdir(target_dir):
                 try:
