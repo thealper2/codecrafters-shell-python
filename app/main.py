@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 
 COMMANDS = ["type", "exit", "echo"]
 
@@ -18,6 +19,25 @@ def find_in_path(command):
 
     return None
 
+def execute_external_command(command_parts):
+    """Execute an external command with its arguments."""
+    if not command_parts:
+        return
+
+    program = command_parts[0]
+    args = commands_parts[1:]
+
+    full_path = find_in_path(program)
+
+    if full_path is None:
+        print(f"{program}: command not found")
+        break
+
+    try:
+        result = subprocess.run([full_path] + args, capture_output=False)
+    except Exception as e:
+        print(f"Error executing {program}: {e}")
+
 def main():
     while True:
         sys.stdout.write("$ ")
@@ -28,26 +48,40 @@ def main():
         except EOFError:
             break
 
+        if not command.strip():
+            continue
+
+        command_parts = command.split()
+        cmd = command_parts[0]
+        args = command_parts[1:] if len(command_parts) > 1 else []
+
         if command == "exit":
             break
         elif command.startswith("echo "):
-            print(command[5:])
+            print(" ".join(args))
         elif command.startswith("type "):
-            cmd = command[5:]
+            if not args:
+                continue
 
-            if cmd in COMMANDS:
-                print(f"{cmd} is a shell builtin")
+            cmd_to_check = args[0]
+
+            if cmd_to_check in COMMANDS:
+                print(f"{cmd_to_check} is a shell builtin")
             else:
-                found_path = find_in_path(cmd)
+                found_path = find_in_path(cmd_to_check)
                 if found_path:
-                    print(f"{cmd} is {found_path}")
+                    print(f"{cmd_to_check} is {found_path}")
                 else:
-                    print(f"{cmd}: not found")
+                    print(f"{cmd_to_check}: not found")
         else:
-            if find_in_path(command):
-                print(f"{command}: command not found")
+            full_path = find_in_path(cmd)
+            if full_path is None:
+                print(f"{cmd}: command not found")
             else:
-                print(f"{command}: command not found")
+                try:
+                    subprocess.run([full_path] + args)
+                except Exception as e:
+                    print(f"Error executing {cmd}: {e}")
 
 if __name__ == "__main__":
     main()
