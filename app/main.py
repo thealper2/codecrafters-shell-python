@@ -25,7 +25,9 @@ def parse_command(line):
     in_single = False
     in_double = False
     stdout_file = None
+    stdout_append = None
     stderr_file = None
+    stderr_append = None
     i = 0
     n = len(line)
     has_current = False
@@ -71,14 +73,20 @@ def parse_command(line):
                 has_current = False
                 
             i += 1
+            append = False
+            if i < n  and line[i] == ">":
+                append = True
+                i += 1
             while i < n and line[i].isspace():
                 i += 1
                 
             fname, i = _parse_token(line, i)
             if fd == 2:
                 stderr_file = fname
+                stderr_append = append
             else:
                 stdout_file = fname
+                stdout_append = append
         elif c.isspace() and not in_single and not in_double:
             if has_current:
                 args.append(''.join(current_arg))
@@ -94,7 +102,7 @@ def parse_command(line):
     if has_current:
         args.append(''.join(current_arg))
         
-    return args, stdout_file, stderr_file
+    return args, stdout_file, stderr_file, stdout_append, stderr_append
 
 def _parse_token(line, i):
     """Parse a single token (respecting quotes/backslashes) starting at i."""
@@ -145,7 +153,7 @@ def main():
         if not command.strip():
             continue
 
-        command_parts, stdout_file, stderr_file  = parse_command(command)
+        command_parts, stdout_file, stderr_file, stdout_append, stderr_append = parse_command(command)
         if not command_parts:
             continue
         
@@ -156,13 +164,13 @@ def main():
         err = None
         if stdout_file is not None:
             try:
-                out = open(stdout_file, "w")
+                out = open(stdout_file, "a" if stdout_append else "w")
             except Exception as e:
                 print(f"{stdout_file}: {e}")
                 continue
         if stderr_file is not None:
             try:
-                err = open(stderr_file, "w")
+                err = open(stderr_file, "a" if stderr_append else "w")
             except Exception as e:
                 print(f"{stderr_file}: {e}")
                 if out: out.close()
