@@ -25,12 +25,50 @@ def get_executables(text):
         
     return matches
 
+last_text = None
+tab_count = 0
+
 def completer(text, state):
+    global last_text, tab_count
+    
     candidates = set(c for c in BUILTINS if c.startswith(text))
     candidates |= get_executables(text)
     matches = [c + " " for c in sorted(candidates)]
-    if state < len(matches):
-        return matches[state]
+    
+    if len(matches) == 0:
+        return None
+    
+    if len(matches) == 1:
+        if state == 0:
+            return matches[0] + " "
+        
+        return None
+    
+    common = os.path.commonprefix(matches)
+    if len(common) > len(text):
+        if state == 0:
+            return common
+        
+        return None
+    
+    if state == 0:
+        if text == last_text:
+            tab_count += 1
+        else:
+            tab_count = 1
+            last_text = text
+            
+        if tab_count == 1:
+            sys.stdout.write("\x07")
+            sys.stdout.flush()
+            return None
+        else:
+            sys.stdout.write("\n" + "  ".join(matches) + "\n")
+            sys.stdout.write("$ " + text)
+            sys.stdout.flush()
+            tab_count = 0
+            last_text = None
+            return None
     
     return None
 
