@@ -3,7 +3,7 @@ import os
 import subprocess
 import readline
 
-BUILTINS = ["echo" "exit"]
+BUILTINS = ["echo", "exit"]
 COMMANDS = ["type", "exit", "echo", "pwd", "cd"]
 
 def completer(text, state):
