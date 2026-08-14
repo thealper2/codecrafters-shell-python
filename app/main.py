@@ -80,7 +80,7 @@ def parse_command(line):
             else:
                 stdout_file = fname
         elif c.isspace() and not in_single and not in_double:
-            if current_arg:
+            if has_current:
                 args.append(''.join(current_arg))
                 current_arg = []
                 has_current = False
@@ -91,7 +91,7 @@ def parse_command(line):
             has_current = True
             i += 1
             
-    if current_arg:
+    if has_current:
         args.append(''.join(current_arg))
         
     return args, stdout_file, stderr_file
@@ -232,7 +232,7 @@ def main():
                 print(f"{cmd}: command not found", file=(err if err else sys.stderr))
             else:
                 try:
-                    subprocess.run([cmd] + args, executable=full_path, stdout=out)
+                    subprocess.run([cmd] + args, executable=full_path, stdout=out, stderr=err)
                 except Exception as e:
                     print(f"Error executing {cmd}: {e}")
 
