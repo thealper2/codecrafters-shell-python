@@ -79,7 +79,7 @@ def parse_command(line):
     if current_arg:
         args.append(''.join(current_arg))
         
-    return args
+    return args, redirect_file
 
 def _parse_token(line, i):
     """Parse a single token (respecting quotes/backslashes) starting at i."""
@@ -130,7 +130,7 @@ def main():
         if not command.strip():
             continue
 
-        command_parts = parse_command(command)
+        command_parts, redirect_file = parse_command(command)
         if not command_parts:
             continue
         
