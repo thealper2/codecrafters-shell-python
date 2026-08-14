@@ -47,7 +47,7 @@ def completer(text, state):
     common = os.path.commonprefix(matches)
     if len(common) > len(text):
         if state == 0:
-            if common in matches and len(matches) == 1:
+            if len(matches) == 1:
                 return common + " "
             
             return common
