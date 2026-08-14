@@ -33,7 +33,7 @@ def completer(text, state):
     
     candidates = set(c for c in BUILTINS if c.startswith(text))
     candidates |= get_executables(text)
-    matches = [c + " " for c in sorted(candidates)]
+    matches = sorted(candidates)
     
     if len(matches) == 0:
         return None
@@ -47,11 +47,8 @@ def completer(text, state):
     common = os.path.commonprefix(matches)
     if len(common) > len(text):
         if state == 0:
-            if len(matches) == 1:
-                return common + " "
-            
             return common
-        
+            
         return None
     
     if state == 0:
