@@ -36,6 +36,13 @@ def parse_command(line):
                 i += 2
             else:
                 i += 1
+        elif c == "\\" and in_double:
+            if i + 1 < n and line[i + 1] in ('"', "\\"):
+                current_arg.append(line[i + 1])
+                i += 2
+            else:
+                current_arg.append(c)
+                i += 1
         elif c == "'" and not in_double:
             in_single = not in_single
             i += 1
