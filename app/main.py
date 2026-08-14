@@ -94,7 +94,7 @@ def completer(text, state):
             sys.stdout.flush()
             return None
         else:
-            display = [os.path.basename(m.rstrip("/")) + ("/" if m.endswith("/") else "" for m in) matches]
+            display = [os.path.basename(m.rstrip("/")) + ("/" if m.endswith("/") else "") for m in matches]
             sys.stdout.write("\n" + "  ".join(matches) + "\n")
             sys.stdout.write("$ " + text)
             sys.stdout.flush()
