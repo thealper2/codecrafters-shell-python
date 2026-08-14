@@ -24,7 +24,8 @@ def parse_command(line):
     current_arg = []
     in_single = False
     in_double = False
-    redirect_file = None
+    stdout_file = None
+    stderr_file = None
     i = 0
     n = len(line)
     has_current = False
@@ -35,6 +36,7 @@ def parse_command(line):
         if c == "\\" and not in_single and not in_double:
             if i + 1 < n:
                 current_arg.append(line[i + 1])
+                has_current = True
                 i += 2
             else:
                 i += 1
@@ -45,14 +47,22 @@ def parse_command(line):
             else:
                 current_arg.append(c)
                 i += 1
+            has_current = True
         elif c == "'" and not in_double:
             in_single = not in_single
+            has_current = True
             i += 1
         elif c == '"' and not in_single:
             in_double = not in_double
+            has_current = True
             i += 1
         elif c == ">" and not in_single and not in_double:
-            if current_arg == ["1"]:
+            fd = 1
+            if current_arg == ["2"]:
+                fd = 2
+                current_arg = []
+                has_current = False
+            elif current_arg == ["1"]:
                 current_arg = []
                 has_current = False
             if has_current:
@@ -65,21 +75,26 @@ def parse_command(line):
                 i += 1
                 
             fname, i = _parse_token(line, i)
-            redirect_file = fname
+            if fd == 2:
+                stderr_file = fname
+            else:
+                stdout_file = fname
         elif c.isspace() and not in_single and not in_double:
             if current_arg:
                 args.append(''.join(current_arg))
                 current_arg = []
+                has_current = False
                 
             i += 1
         else:
             current_arg.append(c)
+            has_current = True
             i += 1
             
     if current_arg:
         args.append(''.join(current_arg))
         
-    return args, redirect_file
+    return args, stdout_file, stderr_file
 
 def _parse_token(line, i):
     """Parse a single token (respecting quotes/backslashes) starting at i."""
@@ -130,7 +145,7 @@ def main():
         if not command.strip():
             continue
 
-        command_parts, redirect_file = parse_command(command)
+        command_parts, stdout_file, stderr_file  = parse_command(command)
         if not command_parts:
             continue
         
@@ -138,15 +153,24 @@ def main():
         args = command_parts[1:] if len(command_parts) > 1 else []
 
         out = None
-        if redirect_file is not None:
+        err = None
+        if stdout_file is not None:
             try:
-                out = open(redirect_file, "w")
+                out = open(stdout_file, "w")
             except Exception as e:
-                print(f"{redirect_file}: {e}")
+                print(f"{stdout_file}: {e}")
+                continue
+        if stderr_file is not None:
+            try:
+                err = open(stderr_file, "w")
+            except Exception as e:
+                print(f"{stderr_file}: {e}")
+                if out: out.close()
                 continue
 
         if cmd == "exit":
             if out: out.close()
+            if err: err.close()
             break
         elif cmd == "echo":
             print(" ".join(args), file=(out if out else sys.stdout))
@@ -189,6 +213,7 @@ def main():
             target = out if out else sys.stdout
             if not args:
                 if out: out.close()
+                if err: err.close()
                 continue
 
             cmd_to_check = args[0]
@@ -204,12 +229,18 @@ def main():
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
-                print(f"{cmd}: command not found")
+                print(f"{cmd}: command not found", file=(err if err else sys.stderr))
             else:
                 try:
                     subprocess.run([cmd] + args, executable=full_path, stdout=out)
                 except Exception as e:
                     print(f"Error executing {cmd}: {e}")
 
+        if out:
+            out.close()
+            
+        if err:
+            err.close()
+            
 if __name__ == "__main__":
     main()
