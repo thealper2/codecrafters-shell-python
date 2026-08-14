@@ -1,8 +1,20 @@
 import sys
 import os
 import subprocess
+import readline
 
+BUILTINS = ["echo" "exit"]
 COMMANDS = ["type", "exit", "echo", "pwd", "cd"]
+
+def completer(text, state):
+    matches = [c + " " for c in BUILTINS if c.startswith(text)]
+    if state < len(matches):
+        return matches[state]
+    
+    return None
+
+readline.set_completer(completer)
+readline.parse_and_bind("tab: complete")
 
 def find_in_path(command):
     """Search for an executable command in PATH directories."""
