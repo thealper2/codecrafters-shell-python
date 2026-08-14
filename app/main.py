@@ -19,6 +19,34 @@ def find_in_path(command):
 
     return None
 
+def parse_command(line):
+    args = []
+    current_arg = []
+    in_quotes = False
+    i = 0
+    n = len(line)
+    
+    while i < n:
+        c = line[i]
+        
+        if c == "'":
+            in_quotes = not in_quotes
+            i += 1
+        elif c.isspace() and not in_quotes:
+            if current_arg:
+                args.append(''.join(current_arg))
+                current_arg = []
+            
+            i += 1
+        else:
+            current_arg.append(c)
+            i += 1
+            
+    if current_arg:
+        args.append(''.join(current_arg))
+        
+    return args
+
 def main():
     while True:
         sys.stdout.write("$ ")
@@ -32,7 +60,10 @@ def main():
         if not command.strip():
             continue
 
-        command_parts = command.split()
+        command_parts = parse_command(command)
+        if not command_parts:
+            continue
+        
         cmd = command_parts[0]
         args = command_parts[1:] if len(command_parts) > 1 else []
 
