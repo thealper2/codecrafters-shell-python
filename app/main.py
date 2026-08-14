@@ -96,7 +96,7 @@ def completer(text, state):
         else:
             display = [os.path.basename(m.rstrip("/")) + ("/" if m.endswith("/") else "") for m in matches]
             sys.stdout.write("\n" + "  ".join(matches) + "\n")
-            sys.stdout.write("$ " + text)
+            sys.stdout.write("$ " + line)
             sys.stdout.flush()
             tab_count = 0
             last_text = None
