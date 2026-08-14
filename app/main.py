@@ -25,22 +25,53 @@ def get_executables(text):
         
     return matches
 
+def get_filenames(text):
+    """Find files/dirs in the relevant directory matching the prefix."""
+    directory = os.path.dirname(text) or "."
+    prefix = os.path.basename(text)
+    matches = []
+    try:
+        for entry in os.listdir(directory):
+            if entry.startswith(prefix):
+                full = os.path.join(directory, entry)
+                if os.path.dirname(text):
+                    candidate = os.path.join(os.path.dirname(text), entry)
+                else:
+                    candidate = entry
+                    
+                if os.path.isdir(full):
+                    matches.append(candidate + "/")
+                else:
+                    matches.append(candidate)
+                    
+    except OSError:
+        pass
+    
+    return matches
+
 last_text = None
 tab_count = 0
 
 def completer(text, state):
     global last_text, tab_count
     
-    candidates = set(c for c in BUILTINS if c.startswith(text))
-    candidates |= get_executables(text)
-    matches = sorted(candidates)
+    line = readline.get_line_buffer()
+    
+    
+    if " " not in line.strip() and not line[:len(line) - len(text)].strip():
+        candidates = set(c for c in BUILTINS if c.startswith(text))
+        candidates |= get_executables(text)
+        matches = sorted(candidates)
+    else:
+        matches = sorted(get_filenames(text))
     
     if len(matches) == 0:
         return None
     
     if len(matches) == 1:
         if state == 0:
-            return matches[0] + " "
+            m = matches[0]
+            return m if m.endswith("/") else m + " "
         
         return None
     
