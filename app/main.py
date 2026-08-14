@@ -30,7 +30,13 @@ def parse_command(line):
     while i < n:
         c = line[i]
         
-        if c == "'" and not in_double:
+        if c == "\\" and not in_single and not in_double:
+            if i + 1 < n:
+                current_arg.append(line[i + 1])
+                i += 2
+            else:
+                i += 1
+        elif c == "'" and not in_double:
             in_single = not in_single
             i += 1
         elif c == '"' and not in_single:
