@@ -105,6 +105,7 @@ def completer(text, state):
 
 readline.set_completer(completer)
 readline.parse_and_bind("tab: complete")
+readline.set_completer_delims(" \t\n")
 
 def find_in_path(command):
     """Search for an executable command in PATH directories."""
