@@ -6,8 +6,29 @@ import readline
 BUILTINS = ["echo", "exit"]
 COMMANDS = ["type", "exit", "echo", "pwd", "cd"]
 
+def get_executables(text):
+    """Find executables in PATH that start with text."""
+    matches = set()
+    path_dirs = os.environ.get("PATH", "").split(os.pathsep)
+    for directory in path_dirs:
+        if not directory or not os.path.isdir(directory):
+            continue
+        try:
+            for entry in os.listdir(directory):
+                if entry.startswith(text):
+                    full_path = os.path.join(directory, entry)
+                    if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+                        matches.add(entry)
+                        
+        except OSError:
+            continue
+        
+    return matches
+
 def completer(text, state):
-    matches = [c + " " for c in BUILTINS if c.startswith(text)]
+    candidates = set(c for c in BUILTINS if c.startswith(text))
+    candidates |= get_executables(text)
+    matches = [c + " " for c in sorted(candidates)]
     if state < len(matches):
         return matches[state]
     
