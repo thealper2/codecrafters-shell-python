@@ -22,21 +22,25 @@ def find_in_path(command):
 def parse_command(line):
     args = []
     current_arg = []
-    in_quotes = False
+    in_single = False
+    in_double = False
     i = 0
     n = len(line)
     
     while i < n:
         c = line[i]
         
-        if c == "'":
-            in_quotes = not in_quotes
+        if c == "'" and not in_double:
+            in_single = not in_single
             i += 1
-        elif c.isspace() and not in_quotes:
+        elif c == '"' and not in_single:
+            in_double = not in_double
+            i += 1
+        elif c.isspace() and not in_single and not in_double:
             if current_arg:
                 args.append(''.join(current_arg))
                 current_arg = []
-            
+                
             i += 1
         else:
             current_arg.append(c)
