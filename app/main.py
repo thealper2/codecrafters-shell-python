@@ -613,6 +613,17 @@ def main():
                                 
                 except OSError:
                     pass
+            elif len(args) >= 2 and args[0] == "-w":
+                path = args[1]
+                length = readline.get_current_history_length()
+                try:
+                    with open(path, "w") as f:
+                        for i in range(1, length + 1):
+                            item = readline.get_history_item(i)
+                            if item is not None:
+                                f.write(item + "\n")
+                except OSError:
+                    pass
             else:
                 length = readline.get_current_history_length()
                 start = 1
