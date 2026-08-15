@@ -408,7 +408,10 @@ def main():
                 script = args[1]
                 cmd_name = args[2]
                 completions[cmd_name] = script
-            if len(args) >= 2 and args[0] == "-p":
+            elif len(args) >= 2 and args[0] == "-r":
+                cmd_name = args[1]
+                completions.pop(cmd_name, None)  
+            elif len(args) >= 2 and args[0] == "-p":
                 cmd_name = args[1]
                 if cmd_name in completions:
                     print(f"complete -C '{completions[cmd_name]}' {cmd_name}", file=target)
