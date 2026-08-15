@@ -264,6 +264,17 @@ def parse_command(line):
                 has_current = False
                 
             i += 1
+        elif c == "$" and not in_single:
+            j = i + 1
+            if j < n and (line[j].isalpha() or line[j] == "_"):
+                start = j
+                while j < n and (line[j].isalnum() or line[j] == "_"):
+                    j += 1
+                    
+                name = line[start:j]
+                current_arg.append(shell_vars.get(name, ""))
+                has_current = True
+                i = j
         else:
             current_arg.append(c)
             has_current = True
