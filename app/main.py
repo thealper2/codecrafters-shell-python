@@ -428,7 +428,14 @@ def main():
                 else:
                     print(f"complete: {cmd_name}: no completion specification", file=target)
         elif cmd == "jobs":
-            pass
+            target = out if out else sys.stdout
+            for job in jobs:
+                if job["proc"].poll() is None:
+                    status = "Running"
+                else:
+                    status = "Done"
+                marker = "+"
+                print(f"[{job['num']}]{marker} {status:<24}{job['cmd']} &", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
