@@ -463,6 +463,7 @@ def run_pipeline(segments):
 def main():
     global job_counter
     history_list = []
+    last_append_index = 0
     while True:
         reap_jobs()
 
@@ -622,6 +623,15 @@ def main():
                     with open(path, "w") as f:
                         for item in history_list:
                             f.write(item + "\n")
+                except OSError:
+                    pass
+            elif len(args) >= 2 and args[0] == "-a":
+                path = args[1]
+                try:
+                    with open(path, "a") as f:
+                        for item in history_list[last_append_index]:
+                            f.write(item + "\n")
+                    last_append_index = len(history_list)
                 except OSError:
                     pass
             else:
