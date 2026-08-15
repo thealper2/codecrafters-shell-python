@@ -4,7 +4,7 @@ import subprocess
 import readline
 
 BUILTINS = ["echo", "exit"]
-COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete", "jobs", "history"]
+COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete", "jobs", "history", "declare"]
 completions = {}
 jobs = []
 
@@ -674,6 +674,8 @@ def main():
                         start = 0
                 for i in range(start, length):
                     print(f"{i:>5}  {history_list[i]}", file=target)
+        elif cmd == "declare":
+            pass
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
