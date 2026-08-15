@@ -286,6 +286,7 @@ def parse_command(line):
                     
                 name = line[start:j]
                 val = shell_vars.get(name, "")
+                current_arg.append(val)
                 if val or in_double:
                     has_current = True
                 i = j
