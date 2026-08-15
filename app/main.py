@@ -363,49 +363,99 @@ def split_pipeline(line):
     segments.append(''.join(current))
     return segments
 
+def run_builtin(cmd, args, out=None):
+    """Execute a builtin, writing to `out` (a file object) or sys.stdout."""
+    target = out if out else sys.stdout
+    if cmd == "echo":
+        print(" ".join(args), file=target)
+    elif cmd == "type":
+        if args:
+            name = args[0]
+            if name in COMMANDS:
+                print(f"{name} is a shell builtin", file=target)
+            else:
+                fp = find_in_path(name)
+                if fp:
+                    print(f"{name} is {fp}", file=target)
+                else:
+                    print(f"{name}: not found", file=target)
+    elif cmd == "pwd":
+        print(os.getcwd(), file=target)
+
 def run_pipeline(segments):
     parsed = []
     for seg in segments:
         parts, so, se, sa, sea = parse_command(seg)
         if parts:
             parsed.append(parts)
-        
     if not parsed:
         return
-    
-    procs = []
-    prev_stdout = None
+
     n = len(parsed)
+    pids = []
+    procs = []
+    prev_read = None
+
     for idx, parts in enumerate(parsed):
         cmd = parts[0]
         args = parts[1:]
-        full_path = find_in_path(cmd)
-        if full_path is None:
-            print(f"{cmd}: command not found", file=sys.stderr)
-            if prev_stdout is not None:
-                prev_stdout.close()
-                
-            return
-        
-        stdin = prev_stdout
+
         if idx < n - 1:
-            stdout = subprocess.PIPE
+            read_fd, write_fd = os.pipe()
         else:
-            stdout = None
-            
-        proc = subprocess.Popen(
-            [cmd] + args,
-            executable=full_path,
-            stdin=stdin,
-            stdout=stdout,
-        )
-        
-        if prev_stdout is not None:
-            prev_stdout.close()
-            
-        prev_stdout = proc.stdout
-        procs.append(proc)
-        
+            read_fd, write_fd = None, None
+
+        is_builtin = cmd in COMMANDS
+
+        if is_builtin:
+            pid = os.fork()
+            if pid == 0:
+                if prev_read is not None:
+                    os.dup2(prev_read, 0)
+                if write_fd is not None:
+                    os.dup2(write_fd, 1)
+                if prev_read is not None:
+                    os.close(prev_read)
+                if read_fd is not None:
+                    os.close(read_fd)
+                if write_fd is not None:
+                    os.close(write_fd)
+                try:
+                    run_builtin(cmd, args)
+                    sys.stdout.flush()
+                finally:
+                    os._exit(0)
+            else:
+                pids.append(pid)
+        else:
+            full_path = find_in_path(cmd)
+            if full_path is None:
+                print(f"{cmd}: command not found", file=sys.stderr)
+            else:
+                stdin = prev_read
+                stdout = write_fd if write_fd is not None else None
+                proc = subprocess.Popen(
+                    [cmd] + args,
+                    executable=full_path,
+                    stdin=stdin,
+                    stdout=stdout,
+                )
+                procs.append(proc)
+
+        if prev_read is not None:
+            os.close(prev_read)
+        if write_fd is not None:
+            os.close(write_fd)
+        prev_read = read_fd
+
+    if prev_read is not None:
+        os.close(prev_read)
+
+    for pid in pids:
+        try:
+            os.waitpid(pid, 0)
+        except ChildProcessError:
+            pass
     for proc in procs:
         proc.wait()
 
