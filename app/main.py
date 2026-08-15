@@ -445,7 +445,7 @@ def main():
                     job_counter += 1
                     jobs.append({
                         "num": job_counter,
-                        "pid": prod.pid,
+                        "pid": proc.pid,
                         "proc": proc,
                         "cmd": " ".join([cmd] + args),
                     })
