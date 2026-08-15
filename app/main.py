@@ -4,7 +4,7 @@ import subprocess
 import readline
 
 BUILTINS = ["echo", "exit"]
-COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete", "jobs"]
+COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete", "jobs", "history"]
 completions = {}
 jobs = []
 
