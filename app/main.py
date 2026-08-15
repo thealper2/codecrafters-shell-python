@@ -602,18 +602,30 @@ def main():
             jobs[:] = remaining
         elif cmd == "history":
             target = out if out else sys.stdout
-            length = readline.get_current_history_length()
-            start = 1
-            if args:
+            if len(args) >= 2 and args[0] == "-r":
+                path = args[1]
                 try:
-                    count = int(args[0])
-                    start = max(1, length - count + 1)
-                except ValueError:
-                    start = 1
-            for i in range(start, length + 1):
-                item = readline.get_history_item(i)
-                if item is not None:
-                    print(f"{i:>5}  {item}", file=target)
+                    with open(path) as f:
+                        for line in f:
+                            entry = line.rstrip("\n")
+                            if entry:
+                                readline.add_history(entry)
+                                
+                except OSError:
+                    pass
+            else:
+                length = readline.get_current_history_length()
+                start = 1
+                if args:
+                    try:
+                        count = int(args[0])
+                        start = max(1, length - count + 1)
+                    except ValueError:
+                        start = 1
+                for i in range(start, length + 1):
+                    item = readline.get_history_item(i)
+                    if item is not None:
+                        print(f"{i:>5}  {item}", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
