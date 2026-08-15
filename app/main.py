@@ -5,6 +5,7 @@ import readline
 
 BUILTINS = ["echo", "exit"]
 COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete"]
+completions = {]
 
 def get_executables(text):
     """Find executables in PATH that start with text."""
@@ -340,9 +341,16 @@ def main():
                     print(f"{cmd_to_check}: not found", file=target)
         elif cmd == "complete":
             target = out if out else sys.stdout
+            if len(args) >= 3 and args[0] == "-C":
+                script = args[1]
+                cmd_name = args[2]
+                completions[cmd_name] = script
             if len(args) >= 2 and args[0] == "-p":
                 cmd_name = args[1]
-                print(f"complete: {cmd_name}: no completion specification", file=target)
+                if cmd_name in completions:
+                    print(f"complete -C '{completions[cmd_name]}' {cmd_name}", file=target)
+                else:
+                    print(f"complete: {cmd_name}: no completion specification", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
