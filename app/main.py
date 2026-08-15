@@ -465,7 +465,7 @@ def main():
     history_list = []
     last_append_index = 0
     histfile = os.environ.get("HISTFILE")
-    shell_vars = []
+    shell_vars = {}
     
     if histfile:
         try:
