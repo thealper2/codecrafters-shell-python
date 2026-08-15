@@ -4,7 +4,7 @@ import subprocess
 import readline
 
 BUILTINS = ["echo", "exit"]
-COMMANDS = ["type", "exit", "echo", "pwd", "cd"]
+COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete"]
 
 def get_executables(text):
     """Find executables in PATH that start with text."""
@@ -338,6 +338,8 @@ def main():
                     print(f"{cmd_to_check} is {found_path}", file=target)
                 else:
                     print(f"{cmd_to_check}: not found", file=target)
+        elif cmd == "complete":
+            pass
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
