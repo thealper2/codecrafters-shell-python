@@ -430,18 +430,27 @@ def main():
         elif cmd == "jobs":
             target = out if out else sys.stdout
             n_jobs = len(jobs)
+            remaining = []
             for idx, job in enumerate(jobs):
                 if job["proc"].poll() is None:
                     status = "Running"
+                    done = False
                 else:
                     status = "Done"
+                    done = True
                 if idx == n_jobs - 1:
                     marker = "+"
                 elif idx == n_jobs - 2:
                     marker = "-"
                 else:
                     marker = " "
-                print(f"[{job['num']}]{marker} {status:<24}{job['cmd']} &", file=target)
+                if done:
+                    print(f"[{job['num']}]{marker} {status:<24}{job['cmd']}", file=target)
+                else:
+                    print(f"[{job['num']}]{marker} {status:<24}{job['cmd']} &", file=target)
+                    remaining.append(job)
+                    
+            jobs[:] = remaining
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
