@@ -460,6 +460,13 @@ def run_pipeline(segments):
     for proc in procs:
         proc.wait()
 
+def is_valid_identifier(name):
+    if not name:
+        return False
+    if not (name[0].isalpha() or name[0] == "_"):
+        return False
+    return all(c.isalnum() or c == "_" for c in name)
+
 def main():
     global job_counter
     history_list = []
@@ -685,7 +692,10 @@ def main():
                     print(f"declare: {name}: not found", file=target)
             elif args and "=" in args[0]:
                 name, _, value = args[0].partition("=")
-                shell_vars[name] = value
+                if is_valid_identifier(name):
+                    shell_vars[name] = value
+                else:
+                    print(f"declare: `{args[0]}': not a valid identifier", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
