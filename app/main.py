@@ -463,7 +463,7 @@ def main():
                 else:
                     marker = " "
                 
-                print(f"[{job['num']}]{marker} {status:<24}{job['cmd']} &", file=target)
+                print(f"[{job['num']}]{marker} {'Running':<24}{job['cmd']} &", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
