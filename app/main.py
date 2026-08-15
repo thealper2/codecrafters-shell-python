@@ -310,8 +310,31 @@ def _parse_token(line, i):
             
     return ''.join(current), i
 
+def reap_jobs(target=None):
+    """Print Done lines for completed jobs and remove thgem. Returns nothing."""
+    if target is None:
+        target = sys.stdout
+        
+    n_jobs = len(jobs)
+    remaining = []
+    for idx, job in enumerate(jobs):
+        if job["proc"].poll() is None:
+            remaining.append(job)
+        else:
+            if idx == n_jobs - 1:
+                marker = "+"
+            elif idx == n_jobs - 2:
+                marker = "-"
+            else:
+                marker = " "
+            print(f"[{job['num']}]{marker}  {'Done':<24}{job['cmd']}", file=target)
+            
+    jobs[:] = remaining
+
 def main():
+    global job_counter
     while True:
+        reap_jobs()
         sys.stdout.write("$ ")
         sys.stdout.flush()
 
@@ -429,28 +452,18 @@ def main():
                     print(f"complete: {cmd_name}: no completion specification", file=target)
         elif cmd == "jobs":
             target = out if out else sys.stdout
+            reap_jobs(target)
             n_jobs = len(jobs)
-            remaining = []
+            
             for idx, job in enumerate(jobs):
-                if job["proc"].poll() is None:
-                    status = "Running"
-                    done = False
-                else:
-                    status = "Done"
-                    done = True
                 if idx == n_jobs - 1:
                     marker = "+"
                 elif idx == n_jobs - 2:
                     marker = "-"
                 else:
                     marker = " "
-                if done:
-                    print(f"[{job['num']}]{marker} {status:<24}{job['cmd']}", file=target)
-                else:
-                    print(f"[{job['num']}]{marker} {status:<24}{job['cmd']} &", file=target)
-                    remaining.append(job)
-                    
-            jobs[:] = remaining
+                
+                print(f"[{job['num']}]{marker} {status:<24}{job['cmd']} &", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
