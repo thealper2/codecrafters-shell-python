@@ -330,6 +330,85 @@ def reap_jobs(target=None):
             
     jobs[:] = remaining
 
+def split_pipeline(line):
+    """Split a line into pipeline segments on unquoted, unescaped '|'."""
+    segments = []
+    current = []
+    in_single = False
+    in_double = False
+    i = 0
+    n = len(line)
+    while i < n:
+        c = line[i]
+        if c == "\\" and not in_single:
+            current.append(c)
+            if i + 1 < n:
+                current.append(line[i + 1])
+                i += 2
+            else:
+                i += 1
+            continue
+        if c == "'" and not in_double:
+            in_single = not in_single
+        elif c == '"' and not in_single:
+            in_double = not in_double
+        if c == "|" and not in_single and not in_double:
+            segments.append(''.join(current))
+            current = []
+            i += 1
+            continue
+        current.append(c)
+        i += 1
+        
+    segments.append(''.join(current))
+    return segments
+
+def run_pipeline(segments):
+    parsed = []
+    for seg in segments:
+        parts, so, se, sa, sea = parse_command(seg)
+        if parts:
+            parted.append(parts)
+        
+    if not parsed:
+        return
+    
+    procs = []
+    prev_stdout = None
+    n = len(parsed)
+    for idx, parts in enumerate(parsed):
+        cmd = parts[0]
+        args = parts[1:]
+        full_path = find_in_path(cmd)
+        if full_path is None:
+            print(f"{cmd}: command not found", file=sys.stderr)
+            if prev_stdout is not None:
+                prev_stdout.close()
+                
+            return
+        
+        stdin = prev_stdout
+        if idx < n - 1:
+            stdout = subprocess.PIPE
+        else:
+            stdout = None
+            
+        proc = subprocess.Popen(
+            [cmd] + args,
+            executable=full_path,
+            stdin=stdin,
+            stdout=stdout,
+        )
+        
+        if prev_stdout is not None:
+            prev_stdout.close()
+            
+        prev_stdout = proc.stdout
+        procs.append(proc)
+        
+    for proc in procs:
+        proc.wait()
+
 def main():
     global job_counter
     while True:
@@ -343,6 +422,11 @@ def main():
             break
 
         if not command.strip():
+            continue
+        
+        segments = split_pipeline(command)
+        if len(segments) > 1:
+            run_pipeline(segments)
             continue
 
         command_parts, stdout_file, stderr_file, stdout_append, stderr_append = parse_command(command)
