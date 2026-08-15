@@ -339,7 +339,10 @@ def main():
                 else:
                     print(f"{cmd_to_check}: not found", file=target)
         elif cmd == "complete":
-            pass
+            target = out if out else sys.stdout
+            if len(args) >= 2 and args[0] == "-p":
+                cmd_name = args[1]
+                print(f"complete: {cmd_name}: no completion specification", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
