@@ -604,7 +604,14 @@ def main():
         elif cmd == "history":
             target = out if out else sys.stdout
             length = readline.get_current_history_length()
-            for i in range(1, length + 1):
+            start = 1
+            if args:
+                try:
+                    count = int(args[0])
+                    start = max(1, length - count + 1)
+                except ValueError:
+                    start = 1
+            for i in range(start, length + 1):
                 item = readline.get_history_item(i)
                 if item is not None:
                     print(f"{i:>5}  {item}", file=target)
