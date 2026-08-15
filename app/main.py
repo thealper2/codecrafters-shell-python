@@ -4,7 +4,7 @@ import subprocess
 import readline
 
 BUILTINS = ["echo", "exit"]
-COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete"]
+COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete", "jobs"]
 completions = {}
 
 def get_executables(text):
@@ -417,6 +417,8 @@ def main():
                     print(f"complete -C '{completions[cmd_name]}' {cmd_name}", file=target)
                 else:
                     print(f"complete: {cmd_name}: no completion specification", file=target)
+        elif cmd == "jobs":
+            pass
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
