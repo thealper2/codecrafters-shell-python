@@ -675,7 +675,10 @@ def main():
                 for i in range(start, length):
                     print(f"{i:>5}  {history_list[i]}", file=target)
         elif cmd == "declare":
-            pass
+            target = out if out else sys.stdout
+            if len(args) >= 2 and args[0] == "-p":
+                name = args[1]
+                print(f"declare: {name}: not found", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
