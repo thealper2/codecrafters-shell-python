@@ -368,7 +368,7 @@ def run_pipeline(segments):
     for seg in segments:
         parts, so, se, sa, sea = parse_command(seg)
         if parts:
-            parted.append(parts)
+            parsed.append(parts)
         
     if not parsed:
         return
