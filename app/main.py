@@ -452,8 +452,8 @@ def main():
                     print(f"complete: {cmd_name}: no completion specification", file=target)
         elif cmd == "jobs":
             target = out if out else sys.stdout
-            reap_jobs(target)
             n_jobs = len(jobs)
+            remaining = []
             
             for idx, job in enumerate(jobs):
                 if idx == n_jobs - 1:
@@ -462,8 +462,12 @@ def main():
                     marker = "-"
                 else:
                     marker = " "
-                
-                print(f"[{job['num']}]{marker} {'Running':<24}{job['cmd']} &", file=target)
+                if job["proc"].poll() is None:
+                    print(f"[{job['num']}]{marker}  {'Running':<24}{job['cmd']} &", file=target)
+                    remaining.append(job)
+                else:
+                    print(f"[{job['num']}]{marker}  {'Done':<24}{job['cmd']}", file=target)
+            jobs[:] = remaining
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
