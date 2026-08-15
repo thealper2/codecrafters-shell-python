@@ -58,6 +58,29 @@ def completer(text, state):
     
     line = readline.get_line_buffer()
     
+    stripped = line.lstrip()
+    parts = stripped.split()
+    if parts:
+        cmd_word = parts[0]
+        
+        if cmd_word in completions and (len(parts) > 1 or line.endswith(" ")):
+            script = completions[cmd_word]
+            try:
+                result = subprocess.run(
+                    [script],
+                    capture_output=True,
+                    text=True,
+                )
+                lines = [l for l in result.stdout.splitlines() if l.startswith(text)]
+            except Exception:
+                lines = []
+                
+            matches = sorted(lines)
+            if len(matches) == 0:
+                return None
+            if state == 0:
+                return matches[0] + " "
+            return None
     
     if " " not in line.strip() and not line[:len(line) - len(text)].strip():
         candidates = set(c for c in BUILTINS if c.startswith(text))
