@@ -464,11 +464,9 @@ def main():
     global job_counter
     while True:
         reap_jobs()
-        sys.stdout.write("$ ")
-        sys.stdout.flush()
 
         try:
-            command = input()
+            command = input("$ ")
         except EOFError:
             break
 
