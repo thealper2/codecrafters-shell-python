@@ -270,8 +270,10 @@ def parse_command(line):
                 end = line.find("}", j + 1)
                 if end != -1:
                     name = line[j + 1:end]
-                    current_arg.append(shell_vars.get(name, ""))
-                    has_current = True
+                    val = shell_vars.get(name, "")
+                    current_arg.append(val)
+                    if val or in_double:
+                        has_current = True
                     i = end + 1
                 else:
                     current_arg.append(c)
@@ -283,9 +285,14 @@ def parse_command(line):
                     j += 1
                     
                 name = line[start:j]
-                current_arg.append(shell_vars.get(name, ""))
-                has_current = True
+                val = shell_vars.get(name, "")
+                if val or in_double:
+                    has_current = True
                 i = j
+            else:
+                current_arg.apend(c)
+                has_current = True
+                i += 1
         else:
             current_arg.append(c)
             has_current = True
