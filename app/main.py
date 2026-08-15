@@ -65,9 +65,14 @@ def completer(text, state):
         
         if cmd_word in completions and (len(parts) > 1 or line.endswith(" ")):
             script = completions[cmd_word]
+            comp_word = text
+            before = line[:len(line) - len(text)]
+            before_words = before.split()
+            prev_word = before_words[-1] if before_words else ""
+            
             try:
                 result = subprocess.run(
-                    [script],
+                    [script, cmd_word, comp_word, prev_word],
                     capture_output=True,
                     text=True,
                 )
