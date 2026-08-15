@@ -87,8 +87,39 @@ def completer(text, state):
             matches = sorted(lines)
             if len(matches) == 0:
                 return None
+            
+            if len(matches) == 1:
+                if state == 0:
+                    return matches[0] + " "
+                
+                return None
+            
+            common = os.path.commmonprefix(matches)
+            if len(common) > len(text):
+                if state == 0:
+                    return common
+                
+                return None
+            
             if state == 0:
-                return matches[0] + " "
+                if text == last_text:
+                    tab_count += 1
+                else:
+                    tab_count = 1
+                    last_text = text
+                    
+                if tab_count == 1:
+                    sys.stdout.write("\x07")
+                    sys.stdout.flush()
+                    return None
+                else:
+                    sys.stdout.write("\n" + "  ".join(matches) + "\n")
+                    sys.stdout.write("$ " + line)
+                    sys.stdout.flush()
+                    tab_count = 0
+                    last_text = None
+                    return None
+                
             return None
     
     if " " not in line.strip() and not line[:len(line) - len(text)].strip():
