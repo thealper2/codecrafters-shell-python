@@ -464,12 +464,34 @@ def main():
     global job_counter
     history_list = []
     last_append_index = 0
+    histfile = os.environ.get("HISTFILE")
+    
+    if histfile:
+        try:
+            with open(histfile) as f:
+                for line in f:
+                    entry = line.rstrip("\n")
+                    if entry:
+                        history_list.append(entry)
+                        readline.add_history(entry)        
+        except OSError:
+            pass
+        
+    last_append_index = len(history_list)
+    
     while True:
         reap_jobs()
 
         try:
             command = input("$ ")
         except EOFError:
+            if histfile:
+                try:
+                    with open(histfile, "w") as f:
+                        for item in history_list:
+                            f.write(item + "\n")
+                except OSError:
+                    pass
             break
 
         history_list.append(command)
@@ -515,6 +537,13 @@ def main():
         if cmd == "exit":
             if out: out.close()
             if err: err.close()
+            if histfile:
+                try:
+                    with open(histfile, "w") as f:
+                        for item in history_list:
+                            f.write(item + "\n")
+                except OSError:
+                    pass
             break
         elif cmd == "echo":
             print(" ".join(args), file=(out if out else sys.stdout))
