@@ -71,7 +71,7 @@ def completer(text, state):
             prev_word = before_words[-1] if before_words else ""
             
             try:
-                comp_ev = os.environ.copy()
+                comp_env = os.environ.copy()
                 comp_env["COMP_LINE"] = line
                 comp_env["COMP_POINT"] = str(len(line))
                 result = subprocess.run(
