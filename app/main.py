@@ -478,12 +478,14 @@ def is_valid_identifier(name):
         return False
     return all(c.isalnum() or c == "_" for c in name)
 
+
+shell_vars = {}
+
 def main():
-    global job_counter
+    global job_counter, shell_vars
     history_list = []
     last_append_index = 0
     histfile = os.environ.get("HISTFILE")
-    shell_vars = {}
     
     if histfile:
         try:
