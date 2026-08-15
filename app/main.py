@@ -462,6 +462,7 @@ def run_pipeline(segments):
 
 def main():
     global job_counter
+    history_list = []
     while True:
         reap_jobs()
 
@@ -470,6 +471,7 @@ def main():
         except EOFError:
             break
 
+        history_list.append(command)
         if not command.strip():
             continue
         
@@ -609,19 +611,17 @@ def main():
                         for line in f:
                             entry = line.rstrip("\n")
                             if entry:
+                                history_list.append(entry)
                                 readline.add_history(entry)
                                 
                 except OSError:
                     pass
             elif len(args) >= 2 and args[0] == "-w":
                 path = args[1]
-                length = readline.get_current_history_length()
                 try:
                     with open(path, "w") as f:
-                        for i in range(1, length + 1):
-                            item = readline.get_history_item(i)
-                            if item is not None:
-                                f.write(item + "\n")
+                        for item in history_list:
+                            f.write(item + "\n")
                 except OSError:
                     pass
             else:
@@ -634,9 +634,7 @@ def main():
                     except ValueError:
                         start = 1
                 for i in range(start, length + 1):
-                    item = readline.get_history_item(i)
-                    if item is not None:
-                        print(f"{i:>5}  {item}", file=target)
+                    print(f"{i:>5}  {history_list[i]}", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
