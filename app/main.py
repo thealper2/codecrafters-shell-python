@@ -625,14 +625,14 @@ def main():
                 except OSError:
                     pass
             else:
-                length = readline.get_current_history_length()
-                start = 1
+                length = len(history_list)
+                start = 0
                 if args:
                     try:
                         count = int(args[0])
-                        start = max(1, length - count + 1)
+                        start = max(1, length - count)
                     except ValueError:
-                        start = 1
+                        start = 0
                 for i in range(start, length + 1):
                     print(f"{i:>5}  {history_list[i]}", file=target)
         else:
