@@ -630,10 +630,10 @@ def main():
                 if args:
                     try:
                         count = int(args[0])
-                        start = max(1, length - count)
+                        start = max(0, length - count)
                     except ValueError:
                         start = 0
-                for i in range(start, length + 1):
+                for i in range(start, length):
                     print(f"{i:>5}  {history_list[i]}", file=target)
         else:
             full_path = find_in_path(cmd)
