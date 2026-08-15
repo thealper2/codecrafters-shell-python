@@ -465,6 +465,7 @@ def main():
     history_list = []
     last_append_index = 0
     histfile = os.environ.get("HISTFILE")
+    shell_vars = []
     
     if histfile:
         try:
@@ -678,7 +679,13 @@ def main():
             target = out if out else sys.stdout
             if len(args) >= 2 and args[0] == "-p":
                 name = args[1]
-                print(f"declare: {name}: not found", file=target)
+                if name in shell_vars:
+                    print(f'declare -- {name}="{shell_vars[name]}"', file=target)
+                else:
+                    print(f"declare: {name}: not found", file=target)
+            elif args and "=" in args[0]:
+                name, _, value = args[0].partition("=")
+                shell_vars[name] = value
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
