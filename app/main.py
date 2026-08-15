@@ -601,6 +601,13 @@ def main():
                 else:
                     print(f"[{job['num']}]{marker}  {'Done':<24}{job['cmd']}", file=target)
             jobs[:] = remaining
+        elif cmd == "history":
+            target = out if out else sys.stdout
+            length = readline.get_current_history_length()
+            for i in range(1, length + 1):
+                item = readline.get_history_item(i)
+                if item is not None:
+                    print(f"{i:>5}  {item}", file=target)
         else:
             full_path = find_in_path(cmd)
             if full_path is None:
