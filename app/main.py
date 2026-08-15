@@ -71,10 +71,14 @@ def completer(text, state):
             prev_word = before_words[-1] if before_words else ""
             
             try:
+                comp_ev = os.environ.copy()
+                comp_env["COMP_LINE"] = line
+                comp_env["COMP_POINT"] = str(len(line))
                 result = subprocess.run(
                     [script, cmd_word, comp_word, prev_word],
                     capture_output=True,
                     text=True,
+                    env=comp_env,
                 )
                 lines = [l for l in result.stdout.splitlines() if l.startswith(text)]
             except Exception:
