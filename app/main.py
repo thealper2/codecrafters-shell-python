@@ -5,7 +5,7 @@ import readline
 
 BUILTINS = ["echo", "exit"]
 COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete"]
-completions = {]
+completions = {}
 
 def get_executables(text):
     """Find executables in PATH that start with text."""
