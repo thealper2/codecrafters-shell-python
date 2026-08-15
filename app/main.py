@@ -6,6 +6,8 @@ import readline
 BUILTINS = ["echo", "exit"]
 COMMANDS = ["type", "exit", "echo", "pwd", "cd", "complete", "jobs"]
 completions = {}
+jobs = []
+job_counter = 0
 
 def get_executables(text):
     """Find executables in PATH that start with text."""
@@ -325,6 +327,14 @@ def main():
         if not command_parts:
             continue
         
+        background = False
+        if command_parts and command_parts[-1] == "&":
+            background = True
+            command_parts = command_parts[:-1]
+            
+        if not command_parts:
+            continue
+        
         cmd = command_parts[0]
         args = command_parts[1:] if len(command_parts) > 1 else []
 
@@ -423,6 +433,25 @@ def main():
             full_path = find_in_path(cmd)
             if full_path is None:
                 print(f"{cmd}: command not found", file=(err if err else sys.stderr))
+            elif background:
+                global job_counter
+                try:
+                    proc = subprocess.Popen(
+                        [cmd] + args,
+                        executable=full_path,
+                        stdout=out,
+                        stderr=err,
+                    )
+                    job_counter += 1
+                    jobs.append({
+                        "num": job_counter,
+                        "pid": prod.pid,
+                        "proc": proc,
+                        "cmd": " ".join([cmd] + args),
+                    })
+                    print(f"[{job_counter}] {proc.pid}")
+                except Exception as e:
+                    print(f"Error executing {cmd}: {e}")
             else:
                 try:
                     subprocess.run([cmd] + args, executable=full_path, stdout=out, stderr=err)
